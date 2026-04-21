@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eco-Bridge | Available Listings</title>
+
     <style>
         :root {
             --primary-green: #2d6a4f;
@@ -18,13 +19,12 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
         }
 
         body {
             background-color: var(--light-bg);
             color: var(--text-dark);
-            padding-bottom: 50px;
         }
 
         header {
@@ -32,34 +32,22 @@
             color: var(--white);
             padding: 1.5rem;
             text-align: center;
-            box-shadow: var(--shadow);
         }
 
         .container {
             max-width: 1000px;
-            margin: 0 auto;
+            margin: auto;
             padding: 20px;
-        }
-
-        .search-section {
-            margin-bottom: 30px;
         }
 
         #searchInput {
             width: 100%;
-            padding: 12px 20px;
-            border: 2px solid #ddd;
+            padding: 12px;
             border-radius: 25px;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.3s;
+            border: 2px solid #ddd;
+            margin-bottom: 20px;
         }
 
-        #searchInput:focus {
-            border-color: var(--primary-green);
-        }
-
-        /* Grid Layout for Cards */
         .listings-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -67,69 +55,32 @@
         }
 
         .card {
-            background: var(--white);
-            border-radius: 12px;
+            background: white;
             padding: 20px;
+            border-radius: 12px;
             box-shadow: var(--shadow);
-            transition: transform 0.2s;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
         }
 
         .item-name {
-            font-size: 1.25rem;
-            color: var(--primary-green);
+            font-size: 18px;
             font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .item-details {
-            font-size: 0.9rem;
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-
-        .label {
-            font-weight: 600;
-            color: #555;
+            color: var(--primary-green);
         }
 
         .claim-btn {
-            background-color: var(--primary-green);
-            color: white;
-            border: none;
+            margin-top: 10px;
+            width: 100%;
             padding: 10px;
+            border: none;
+            background: var(--primary-green);
+            color: white;
             border-radius: 6px;
             cursor: pointer;
-            font-weight: bold;
-            width: 100%;
-            transition: opacity 0.3s;
-        }
-
-        .claim-btn:hover {
-            opacity: 0.9;
         }
 
         .no-results {
             text-align: center;
-            grid-column: 1 / -1;
-            padding: 40px;
-            color: #666;
-        }
-
-        @media (max-width: 600px) {
-            .container {
-                padding: 15px;
-            }
-
-            header h1 {
-                font-size: 1.5rem;
-            }
+            grid-column: 1/-1;
         }
     </style>
 </head>
@@ -138,61 +89,46 @@
 
     <header>
         <h1>Eco-Bridge</h1>
-        <p>Connecting Resources, Reducing Waste</p>
+        <p>Available Donations</p>
+        <a href="donor.html" style="color:white;">← Back to Donor</a>
     </header>
 
     <div class="container">
-        <div class="search-section">
-            <input type="text" id="searchInput" placeholder="Search items (e.g. bread, furniture...)"
-                onkeyup="filterItems()">
-        </div>
-
-        <div id="listingsContainer" class="listings-grid">
-        </div>
+        <input type="text" id="searchInput" placeholder="Search items..." onkeyup="filterItems()">
+        <div id="listingsContainer" class="listings-grid"></div>
     </div>
 
     <script>
-        // Sample data loader for demonstration if localStorage is empty
-        function initData() {
-            const existing = localStorage.getItem('ecoBridgeListings');
-            if (!existing) {
-                const sampleListings = [
-                    { id: 1, name: "Wooden Chairs", condition: "Good", quantity: "2" },
-                    { id: 2, name: "Fresh Bagels", condition: "New", quantity: "6" },
-                    { id: 3, name: "Winter Jacket", condition: "Like New", quantity: "1" }
-                ];
-                localStorage.setItem('ecoBridgeListings', JSON.stringify(sampleListings));
-            }
-        }
+        const STORAGE_KEY = "ecoBridge.donations.v1";
 
         function renderListings(filter = "") {
             const container = document.getElementById('listingsContainer');
-            const listings = JSON.parse(localStorage.getItem('ecoBridgeListings')) || [];
+            let listings = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 
             container.innerHTML = "";
 
             const filtered = listings.filter(item =>
-                item.name.toLowerCase().includes(filter.toLowerCase())
+                item.itemName.toLowerCase().includes(filter.toLowerCase())
             );
 
-            if (filtered.length === 0) {
-                container.innerHTML = `<p class="no-results">No items found matching your search.</p>`;
+            if (!filtered.length) {
+                container.innerHTML = `<p class="no-results">No donations available</p>`;
                 return;
             }
 
-            filtered.forEach(item => {
+            filtered.reverse().forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'card';
+
                 card.innerHTML = `
-                <div>
-                    <div class="item-name">${item.name}</div>
-                    <div class="item-details">
-                        <p><span class="label">Condition:</span> ${item.condition}</p>
-                        <p><span class="label">Quantity:</span> ${item.quantity}</p>
-                    </div>
-                </div>
-                <button class="claim-btn" onclick="claimItem(${item.id})">Claim Item</button>
-            `;
+                    <div class="item-name">${item.itemName}</div>
+                    <p><b>Quantity:</b> ${item.quantity}</p>
+                    <p><b>Condition:</b> ${item.condition}</p>
+                    <p><b>Notes:</b> ${item.notes || 'None'}</p>
+                    ${item.imageDataUrl ? `<img src="${item.imageDataUrl}" width="100%">` : ""}
+                    <button class="claim-btn" onclick="claimItem('${item.id}')">Claim</button>
+                `;
+
                 container.appendChild(card);
             });
         }
@@ -203,12 +139,16 @@
         }
 
         function claimItem(id) {
-            alert(`Item ${id} claimed! In a full app, this would notify the donor.`);
-            // Logic to remove or update item in localStorage would go here
+            let listings = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+
+            listings = listings.filter(item => item.id !== id);
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(listings));
+
+            alert("Item claimed successfully!");
+            renderListings();
         }
 
-        // Initialize
-        initData();
         renderListings();
     </script>
 
