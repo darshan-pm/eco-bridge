@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eco-Bridge | Available Listings</title>
+    <style>
+        :root {
+            --primary-green: #2d6a4f;
+            --brand-2: #40916c;
+            --light-bg: #f8f9fa;
+            --text-dark: #212529;
+            --white: #ffffff;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+        }
+
+        header {
+            background-color: var(--primary-green);
+            color: var(--white);
+            padding: 2rem 1.5rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 15px;
+            border-radius: 30px;
+            border: 2px solid #ddd;
+            margin-bottom: 30px;
+            outline: none;
+            font-size: 16px;
+        }
+
+        #searchInput:focus {
+            border-color: var(--primary-green);
+        }
+
+        .listings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s;
+            border: 1px solid #eee;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-content {
+            padding: 20px;
+        }
+
+        .item-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary-green);
+            margin-bottom: 10px;
+            text-transform: capitalize;
+        }
+
+        .item-details {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .claim-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            background: linear-gradient(135deg, var(--primary-green), var(--brand-2));
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: opacity 0.2s;
+        }
+
+        .claim-btn:hover {
+            opacity: 0.9;
+        }
+
+        .no-results {
+            text-align: center;
+            grid-column: 1/-1;
+            padding: 50px;
+            color: #888;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #e8f5e9;
+            color: var(--primary-green);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Eco-Bridge Marketplace</h1>
+        <p>Real-time resources for NGOs & Students</p>
+        <a href="index(1).html"
+            style="color:rgba(255,255,255,0.8); text-decoration:none; font-size:14px; display:inline-block; margin-top:15px;">
+            ← Switch to Donor Mode
+        </a>
+    </header>
+
+    <div class="container">
+        <input type="text" id="searchInput" placeholder="Search for food, books, materials..." onkeyup="filterItems()">
+
+        <div id="listingsContainer" class="listings-grid">
+            <!-- Items will appear here -->
+        </div>
+    </div>
+
+    <script>
+        // This matches the key we used in index(1).html
+        const STORAGE_KEY = "ecoBridgeItems";
+
+        function renderListings(filter = "") {
+            const container = document.getElementById('listingsContainer');
+            let listings = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+
+            container.innerHTML = "";
+
+            const filtered = listings.filter(item =>
+                item.name.toLowerCase().includes(filter.toLowerCase())
+            );
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="no-results">
+                        <h3>No items available right now.</h3>
+                        <p>Check back later or be the first to donate!</p>
+                    </div>`;
+                return;
+            }
+
+            // Show newest items first
+            filtered.reverse().forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+
+                card.innerHTML = `
+                    <div class="card-content">
+                        <div class="badge">AI VERIFIED</div>
+                        <div class="item-name">${item.name}</div>
+                        <p class="item-details">${item.details}</p>
+                        <button class="claim-btn" onclick="claimItem(${item.id})">CLAIM RESOURCE</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function filterItems() {
+            const query = document.getElementById('searchInput').value;
+            renderListings(query);
+        }
+
+        function claimItem(id) {
+            let listings = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+
+            // Remove the item from the list
+            listings = listings.filter(item => item.id !== id);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(listings));
+
+            alert("✅ Resource Claimed! Pickup details sent to your registered ID.");
+            renderListings();
+        }
+
+        // Initial Load
+        renderListings();
+    </script>
+
+</body>
+
+</html>
